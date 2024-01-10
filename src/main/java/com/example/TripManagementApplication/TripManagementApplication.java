@@ -13,7 +13,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
 
 @SpringBootApplication(exclude = {SecurityAutoConfiguration.class })
-@OpenAPIDefinition(info = @Info(title = "Case study submission by Neeraj"))
+@OpenAPIDefinition(info = @Info(title = "Case study submission by Neeraj Swami"))
 public class TripManagementApplication implements CommandLineRunner {
 
 	@Autowired

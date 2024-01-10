@@ -2,12 +2,14 @@ package com.example.TripManagementApplication.controller;
 
 
 import com.example.TripManagementApplication.model.Bus;
-import com.example.TripManagementApplication.payload.request.AddBusRequest;
+import com.example.TripManagementApplication.model.Route;
 import com.example.TripManagementApplication.payload.request.AddScheduleRequest;
 import com.example.TripManagementApplication.payload.response.GenericResponse;
 import com.example.TripManagementApplication.service.BusService;
+import com.example.TripManagementApplication.service.RouteService;
 import com.example.TripManagementApplication.service.ScheduleService;
 import com.example.TripManagementApplication.service.UserService;
+import io.swagger.v3.oas.annotations.headers.Header;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -20,6 +22,9 @@ public class AdminController {
   @Autowired
   BusService busService;
 
+    @Autowired
+    RouteService routeService;
+
   @Autowired
   ScheduleService scheduleService;
 
@@ -27,37 +32,75 @@ public class AdminController {
   UserService userService;
 
   @PostMapping("/add-bus")
-  public ResponseEntity<GenericResponse> addBus(@Valid @RequestBody AddBusRequest addBusRequest) {
-    boolean isLoggedIn = userService.isLoggedIn(addBusRequest.getToken());
-    if(isLoggedIn) {
-
-      System.out.println("HelloBuddy>>"+addBusRequest);
-      busService.addBus(addBusRequest.getBus());
-      return ResponseEntity.ok(new GenericResponse("Bus added successfully"));
+  public ResponseEntity<GenericResponse> addBus(@Valid @RequestBody Bus bus,@Valid @RequestHeader String token) {
+     if(userService.isLoggedIn(token)) {
+      if(userService.isAdmin(token)) {
+        busService.addBus(bus);
+        return ResponseEntity.ok(new GenericResponse("Bus added successfully"));
+      }else{
+        throw new RuntimeException("Only Admin can add bus");
+      }
     }
     else {
       throw new RuntimeException("Invalid credentials");
     }
-
-
   }
 
   @PostMapping("/edit-bus")
-  public ResponseEntity<GenericResponse> editBus(@Valid @RequestBody Bus bus) {
-    busService.editBus(bus);
-    return ResponseEntity.ok(new GenericResponse("Bus edited successfully"));
+  public ResponseEntity<GenericResponse> editBus(@Valid @RequestBody Bus bus, @Valid @RequestHeader String token) {
+    if(userService.isLoggedIn(token)) {
+      if (userService.isAdmin(token)) {
+        busService.editBus(bus);
+        return ResponseEntity.ok(new GenericResponse("Bus details updated successfully"));
+      } else {
+        throw new RuntimeException("Only Admin can edit bus details");
+      }
+    }
+    else {
+      throw new RuntimeException("Invalid credentials");
+    }
   }
 
   @PostMapping("/delete-bus/{regNumber}")
-  public ResponseEntity<GenericResponse> deleteBus(@PathVariable String regNumber) {
-    busService.deleteBus(regNumber);
-    return ResponseEntity.ok(new GenericResponse("Bus deleted successfully"));
+  public ResponseEntity<GenericResponse> deleteBus(@PathVariable String regNumber, @Valid @RequestHeader String token) {
+    if(userService.isLoggedIn(token)) {
+      if (userService.isAdmin(token)){
+      busService.deleteBus(regNumber);
+      return ResponseEntity.ok(new GenericResponse("Bus deleted successfully"));
+    }else{
+      throw new RuntimeException("Only Admin can add bus");
+    }
+    }
+    else {
+      throw new RuntimeException("Invalid credentials");
+    }
   }
 
+    @PostMapping("/add-route")
+    public ResponseEntity<GenericResponse> addRoute(@Valid @RequestBody Route route, @Valid @RequestHeader String token) {
+
+        if(userService.isLoggedIn(token)) {
+            if(userService.isAdmin(token)) {
+                routeService.addRoute(route);
+                return ResponseEntity.ok(new GenericResponse("Route added successfully"));
+            }else{
+                throw new RuntimeException("Only Admin can add bus");
+            }
+        }
+        else {
+            throw new RuntimeException("Invalid credentials");
+        }
+    }
+
   @PostMapping("/add-schedule")
-  public ResponseEntity<GenericResponse> addSchedule(
-      @RequestBody AddScheduleRequest addScheduleRequest) {
-    scheduleService.addSchedule(addScheduleRequest);
-    return ResponseEntity.ok(new GenericResponse("Bus deleted successfully"));
-  }
+  public ResponseEntity<GenericResponse> addSchedule(@RequestBody AddScheduleRequest addScheduleRequest, @RequestHeader String token) {
+   boolean isLoggedIn = userService.isLoggedIn(token);
+    if(isLoggedIn) {
+      scheduleService.addSchedule(addScheduleRequest);
+      return ResponseEntity.ok(new GenericResponse("Schedule added successfully"));
+    }
+    else {
+      throw new RuntimeException("Invalid credentials");
+    }
+   }
 }

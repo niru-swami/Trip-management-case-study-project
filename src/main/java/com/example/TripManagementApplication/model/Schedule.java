@@ -4,8 +4,9 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 
-import java.time.LocalTime;
+import java.sql.Time;
 
 
 @Entity
@@ -20,10 +21,10 @@ public class Schedule {
     private Long id;
 
     @Column(name = "start_time")
-    private LocalTime startTime;
+    private String startTime;
 
     @Column(name = "end_time")
-    private LocalTime endTime;
+    private String endTime;
 
     @ManyToOne
     private Bus bus;
